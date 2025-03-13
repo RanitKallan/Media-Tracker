@@ -1,0 +1,207 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Darker background */
+    color: #fff; /* Light text */
+    line-height: 1.6;
+}
+
+.container, .index-container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 50px auto;
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+    text-align: center;
+    color: #1591d4; /* Teal Color */
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* 3D effect */
+}
+
+nav {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff;
+    margin: 0 20px;
+    padding: 12px 25px;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+    background-color: #333;
+}
+
+nav a:hover {
+    background-color: #1591d4; /* Teal Hover */
+    color: #121212;
+}
+
+#anime-form, #game-form {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#anime-form input, #game-form input {
+    padding: 10px;
+    border: 1px solid #333; /* Darker border */
+    border-radius: 5px;
+    flex-grow: 1;
+    background-color: #333; /* Darker input */
+    color: #fff; /* Light text */
+}
+
+#anime-form button, #game-form button {
+    background-color: #00bfff;
+    color: #121212; /* Darker text */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#anime-form button:hover, #game-form button:hover {
+    background-color: #0080c0; /* Slightly darker hover */
+}
+
+#anime-list li, #game-list li {
+    border: 1px solid #333; /* Darker border */
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+    background-color: #2c2c2c; /* Darker list item */
+}
+
+#anime-list li button, #game-list li button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#anime-list li button:hover, #game-list li button:hover {
+    background-color: #d32f2f;
+}
+
+.media-item-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.media-item-text {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.media-item-image img {
+    max-height: 120px;
+    max-width: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+}
+
+#anime-search, #game-search{
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #333; /* Darker border */
+    border-radius: 5px;
+    background-color: #333; /* Darker search input */
+    color: #fff; /* Light text */
+}
+
+#anime-count, #game-count{
+    text-align: center;
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Index Page Styles */
+
+.index-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.index-section {
+    width: 45%;
+    min-width: 300px;
+    background-color: #2c2c2c;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.index-section h2 {
+    color: #00bfff;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+
+.index-section p {
+    margin-bottom: 20px;
+}
+
+.index-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #00bfff;
+    color: #121212;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: bold;
+}
+
+.index-button:hover {
+    background-color: #fff;
+    color: #121212;
+}
+
+footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-top: 1px solid #333;
+    color: #aaa;
+}
+
+.index-image-container {
+    width: 100%;
+    max-height: 400px; /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.index-preview-image {
+    width: 100%;
+    object-fit: cover;
+}
