@@ -205,3 +205,22 @@ footer {
     width: 100%;
     object-fit: cover;
 }
+
+#delete-selected-anime {
+    background-color: #d9534f; /* Reddish color */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+#delete-selected-anime:hover {
+    background-color: #c9302c; /* Darker red on hover */
+}
+
+#delete-selected-anime:active {
+    background-color: #ac2925; /* Even darker red on click */
+}
