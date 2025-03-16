@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
                 <span class="anime-title-span">${index + 1}. ${anime.title}</span>
-                <button class="watch-count-button" data-index="${index}">Rewatched: ${anime.watchCount || 0}</button>
+                <button class="watch-count-button" data-index="${index}"> ${anime.watchCount || 0}</button>
             `;
             animeList.appendChild(listItem);
 
