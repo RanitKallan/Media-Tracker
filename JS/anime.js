@@ -1,115 +1,66 @@
-// anime.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+    const animeList = document.getElementById('anime-list');
     const animeTitleInput = document.getElementById('anime-title');
     const addAnimeButton = document.getElementById('add-anime');
-    const animeList = document.getElementById('anime-list');
     const animeSearchInput = document.getElementById('anime-search');
-    const deleteSelectedAnimeButton = document.getElementById('delete-selected-anime');
-    const animeCount = document.getElementById('anime-count');
+    const animeCountDisplay = document.getElementById('anime-count');
+    const deleteSelectedButton = document.getElementById('delete-selected-anime');
 
-    async function fetchAnimeImage(title) {
-        try {
-            // Replace with your actual API endpoint and key
-            const response = await fetch(`YOUR_ANIDB_API_ENDPOINT?title=${encodeURIComponent(title)}&YOUR_API_KEY`);
-            const data = await response.json();
+    let animeData = JSON.parse(localStorage.getItem('animeList')) || [];
 
-            if (data && data.image) {
-                return data.image;
-            } else {
-                return '';
-            }
-        } catch (error) {
-            console.error('Error fetching anime image:', error);
-            return '';
-        }
+    function capitalizeFirstLetter(string) {
+        return string.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
 
-    async function addAnime() {
-        let title = animeTitleInput.value.trim();
-
-        if (title) {
-            title = title.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-
-            const animeData = JSON.parse(localStorage.getItem('animeList')) || [];
-            if (animeData.some(anime => anime.title.toLowerCase() === title.toLowerCase())) {
-                alert('Anime with this name already exists.');
-                return;
-            }
-
-            const image = await fetchAnimeImage(title);
-            const anime = { title: title, image: image };
-            animeData.push(anime);
-            localStorage.setItem('animeList', JSON.stringify(animeData));
-
-            animeTitleInput.value = '';
-            displayAnimeList(animeSearchInput.value);
-            updateAnimeCount();
-        }
-    }
-
-    function displayAnimeList(searchTerm = '') {
+    function renderAnimeList() {
         animeList.innerHTML = '';
-        const animeData = JSON.parse(localStorage.getItem('animeList')) || [];
-
-        const filteredAnime = animeData.filter(anime =>
-            anime.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        const searchTerm = animeSearchInput.value.toLowerCase();
+        const filteredAnime = animeData.filter(anime => anime.title.toLowerCase().includes(searchTerm));
 
         filteredAnime.forEach((anime, index) => {
             const listItem = document.createElement('li');
             listItem.innerHTML = `
-                <div class="media-item-content">
-                    <div class="media-item-text">
-                        ${index + 1}. ${anime.title}
-                    </div>
-                    <div class="media-item-image">
-                        <img src="${anime.image}" alt="${anime.title}" onerror="this.style.display='none'">
-                    </div>
-                </div>
+                <span class="anime-title-span">${index + 1}. ${anime.title}</span>
+                <button class="watch-count-button" data-index="${index}">Rewatched: ${anime.watchCount || 0}</button>
             `;
-            listItem.dataset.index = index;
             animeList.appendChild(listItem);
+
+            listItem.querySelector('.watch-count-button').addEventListener('click', () => {
+                anime.watchCount = (anime.watchCount || 0) + 1;
+                localStorage.setItem('animeList', JSON.stringify(animeData));
+                renderAnimeList();
+            });
         });
+
+        animeCountDisplay.textContent = `${filteredAnime.length}`;
     }
 
-    function updateAnimeCount() {
-        const animeData = JSON.parse(localStorage.getItem('animeList')) || [];
-        animeCount.textContent = animeData.length;
-    }
+    renderAnimeList();
 
-    displayAnimeList();
-    updateAnimeCount();
-
-    animeTitleInput.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            addAnime();
+    addAnimeButton.addEventListener('click', () => {
+        let title = animeTitleInput.value.trim();
+        if (title) {
+            title = capitalizeFirstLetter(title);
+            if (!animeData.some(anime => anime.title === title)) {
+                animeData.push({ title: title, watchCount: 0 });
+                localStorage.setItem('animeList', JSON.stringify(animeData));
+                animeTitleInput.value = '';
+                renderAnimeList();
+            } else {
+                alert("Anime already exists in the list.");
+            }
         }
     });
 
-    addAnimeButton.addEventListener('click', addAnime);
-
-    animeSearchInput.addEventListener('input', function() {
-        displayAnimeList(animeSearchInput.value);
+    animeSearchInput.addEventListener('input', () => {
+        renderAnimeList();
     });
 
-    deleteSelectedAnimeButton.addEventListener('click', function() {
-        const selectedItems = Array.from(animeList.querySelectorAll('li.selected'));
-        const animeData = JSON.parse(localStorage.getItem('animeList')) || [];
-        const indicesToDelete = selectedItems.map(item => parseInt(item.dataset.index)).sort((a, b) => b - a);
-
-        indicesToDelete.forEach(index => {
-            animeData.splice(index, 1);
-        });
-
+    deleteSelectedButton.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('.anime-checkbox:checked');
+        const indicesToDelete = Array.from(checkboxes).map(checkbox => parseInt(checkbox.dataset.index)).sort((a, b) => b - a);
+        indicesToDelete.forEach(index => animeData.splice(index, 1));
         localStorage.setItem('animeList', JSON.stringify(animeData));
-        displayAnimeList(animeSearchInput.value);
-        updateAnimeCount();
-    });
-
-    animeList.addEventListener('click', function(event) {
-        const listItem = event.target.closest('li');
-        if (listItem) {
-            listItem.classList.toggle('selected');
-        }
+        renderAnimeList();
     });
 });
