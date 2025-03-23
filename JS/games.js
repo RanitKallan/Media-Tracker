@@ -7,6 +7,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteSelectedGameButton = document.getElementById('delete-selected-game');
     const gameCount = document.getElementById('game-count');
 
+    let gameData = JSON.parse(localStorage.getItem('gameList')) || [];
+    let saveTimeout = null;
+
+    // Function to batch localStorage updates
+    function saveGameData() {
+        // Clear any existing timeout
+        if (saveTimeout) {
+            clearTimeout(saveTimeout);
+        }
+        
+        // Set a new timeout - only save after 500ms of inactivity
+        saveTimeout = setTimeout(() => {
+            localStorage.setItem('gameList', JSON.stringify(gameData));
+            saveTimeout = null;
+        }, 500);
+    }
+
     async function fetchGameImage(title) {
         try {
             // Replace with your actual API endpoint and key
@@ -30,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (title) {
             title = title.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-            const gameData = JSON.parse(localStorage.getItem('gameList')) || [];
             if (gameData.some(game => game.title.toLowerCase() === title.toLowerCase())) {
                 alert('Game with this name already exists.');
                 return;
@@ -43,7 +59,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Sort the gameData array alphabetically by title
             gameData.sort((a, b) => a.title.localeCompare(b.title));
 
-            localStorage.setItem('gameList', JSON.stringify(gameData));
+            // Use batched save instead of immediate save
+            saveGameData();
 
             gameTitleInput.value = '';
             displayGameList(gameSearchInput.value);
@@ -53,8 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayGameList(searchTerm = '') {
         gameList.innerHTML = '';
-        const gameData = JSON.parse(localStorage.getItem('gameList')) || [];
-
+        
         const filteredGames = gameData.filter(game =>
             game.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -77,7 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateGameCount() {
-        const gameData = JSON.parse(localStorage.getItem('gameList')) || [];
         gameCount.textContent = gameData.length;
     }
 
@@ -96,19 +111,23 @@ document.addEventListener('DOMContentLoaded', function() {
         displayGameList(gameSearchInput.value);
     });
 
-    deleteSelectedGameButton.addEventListener('click', function() {
-        const selectedItems = Array.from(gameList.querySelectorAll('li.selected'));
-        const gameData = JSON.parse(localStorage.getItem('gameList')) || [];
-        const indicesToDelete = selectedItems.map(item => parseInt(item.dataset.index)).sort((a, b) => b - a);
+    // If this button exists in your HTML
+    if (deleteSelectedGameButton) {
+        deleteSelectedGameButton.addEventListener('click', function() {
+            const selectedItems = Array.from(gameList.querySelectorAll('li.selected'));
+            const indicesToDelete = selectedItems.map(item => parseInt(item.dataset.index)).sort((a, b) => b - a);
 
-        indicesToDelete.forEach(index => {
-            gameData.splice(index, 1);
+            indicesToDelete.forEach(index => {
+                gameData.splice(index, 1);
+            });
+
+            // Use batched save instead of immediate save
+            saveGameData();
+            
+            displayGameList(gameSearchInput.value);
+            updateGameCount();
         });
-
-        localStorage.setItem('gameList', JSON.stringify(gameData));
-        displayGameList(gameSearchInput.value);
-        updateGameCount();
-    });
+    }
 
     gameList.addEventListener('click', function(event) {
         const listItem = event.target.closest('li');
