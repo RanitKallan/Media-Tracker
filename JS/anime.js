@@ -5,48 +5,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const animeSearchInput = document.getElementById('anime-search');
   const animeCountDisplay = document.getElementById('anime-count');
 
+  const STORAGE_KEY = 'animeList';
 
-  // Array for ordered display + Map for quick duplicate checking
+  // Main data
   let animeArray = [];
   let animeTitleMap = new Map();
 
-  const STORAGE_KEY = 'animeList';
-
-  // Load data
-  const loadData = () => {
-    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    animeArray = Array.isArray(savedData) ? savedData : [];
-
-    animeTitleMap.clear();
-    animeArray.forEach((anime, index) => {
-      if (anime && anime.title) animeTitleMap.set(anime.title.toLowerCase(), index);
-    });
-  };
-
-  loadData();
-
   let saveTimeout = null;
   let renderTimeout = null;
-  let isRendering = false;
 
-  // Batch localStorage updates
   function saveAnimeData() {
     if (saveTimeout) clearTimeout(saveTimeout);
-
     saveTimeout = setTimeout(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(animeArray));
       saveTimeout = null;
-    }, 300);
+    }, 200);
   }
 
-  function capitalizeFirstLetter(string) {
-    return string
+  function capitalizeFirstLetter(str) {
+    return String(str || '')
       .toLowerCase()
       .trim()
       .replace(/\s+/g, ' ')
       .split(' ')
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
   }
 
@@ -57,58 +40,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ✅ Proper virtual scrolling (renders based on scroll position)
-function renderAnimeList() {
-  const searchTerm = (animeSearchInput.value || '').toLowerCase();
+  // ✅ Load + CLEAN bad entries so render never breaks mid-list
+  function loadData() {
+    let savedData = [];
+    try {
+      savedData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch {
+      savedData = [];
+    }
 
-  const filtered = searchTerm
-    ? animeArray.filter(a => a.title.toLowerCase().includes(searchTerm))
-    : animeArray;
+    const cleaned = (Array.isArray(savedData) ? savedData : [])
+      .filter(a => a && typeof a === 'object' && typeof a.title === 'string' && a.title.trim().length > 0)
+      .map(a => ({
+        title: a.title.trim(),
+        watchCount: Number.isFinite(Number(a.watchCount)) ? Number(a.watchCount) : 0
+      }));
 
-  animeCountDisplay.textContent = `${filtered.length}`;
+    animeArray = cleaned;
+    rebuildTitleMap();
 
-  animeList.innerHTML = '';
-  const fragment = document.createDocumentFragment();
+    // Persist cleaned version so the bug never returns
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(animeArray));
+  }
 
-  filtered.forEach((anime, i) => {
-    const li = document.createElement('li');
-    li.className = 'anime-row'; //  for styling
+  function renderAnimeList() {
+    const searchTerm = (animeSearchInput.value || '').toLowerCase().trim();
 
-    const titleSpan = document.createElement('span');
-    titleSpan.className = 'anime-title-span';
-    titleSpan.textContent = `${i + 1}. ${anime.title}`;
+    // Keep original indices so watch count updates correct item
+    const filtered = searchTerm
+      ? animeArray
+          .map((anime, idx) => ({ anime, idx }))
+          .filter(({ anime }) => anime.title.toLowerCase().includes(searchTerm))
+      : animeArray.map((anime, idx) => ({ anime, idx }));
 
-    const btn = document.createElement('button');
-    btn.className = 'watch-count-button';
-    // IMPORTANT: use the real index from animeArray 
-    const realIndex = animeArray.indexOf(anime);
-    btn.dataset.index = String(realIndex);
-    btn.textContent = `${anime.watchCount || 0}`;
+    animeCountDisplay.textContent = `${filtered.length}`;
 
-    li.appendChild(titleSpan);
-    li.appendChild(btn);
-    fragment.appendChild(li);
-  });
+    animeList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
 
-  animeList.appendChild(fragment);
-}
+    filtered.forEach(({ anime, idx }, i) => {
+      const li = document.createElement('li');
+      li.className = 'anime-row';
+      li.style.display = 'flex';
+      li.style.justifyContent = 'space-between';
+      li.style.alignItems = 'center';
 
-  // Click handler bound ONCE 
-  animeList.addEventListener('click', (e) => {
-    const btn = e.target.closest('.watch-count-button');
-    if (!btn) return;
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'anime-title-span';
+      // ✅ SAFE: textContent prevents titles breaking your HTML
+      titleSpan.textContent = `${i + 1}. ${anime.title}`;
 
-    const index = parseInt(btn.dataset.index, 10);
-    if (Number.isNaN(index) || !animeArray[index]) return;
+      const btn = document.createElement('button');
+      btn.className = 'watch-count-button';
+      btn.dataset.index = String(idx);
+      btn.textContent = `${anime.watchCount || 0}`;
 
-    animeArray[index].watchCount = (animeArray[index].watchCount || 0) + 1;
-    saveAnimeData();
+      li.appendChild(titleSpan);
+      li.appendChild(btn);
+      fragment.appendChild(li);
+    });
 
-    // Update only the clicked button text
-    btn.textContent = ` ${animeArray[index].watchCount}`;
-  });
+    animeList.appendChild(fragment);
+  }
 
-  // Add anime
   function addAnime() {
     let title = animeTitleInput.value.trim();
     if (!title) return;
@@ -123,30 +117,30 @@ function renderAnimeList() {
 
     animeArray.push({ title, watchCount: 0 });
     rebuildTitleMap();
-
     saveAnimeData();
+
     animeTitleInput.value = '';
     renderAnimeList();
   }
 
-  // Delete anime by index
-  function deleteAnime(index) {
-    if (!animeArray[index]) return;
+  // ✅ Click handler (watch count increment) — bound once
+  animeList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.watch-count-button');
+    if (!btn) return;
 
-    animeArray.splice(index, 1);
-    rebuildTitleMap();
+    const index = parseInt(btn.dataset.index, 10);
+    if (Number.isNaN(index) || !animeArray[index]) return;
 
+    animeArray[index].watchCount = (animeArray[index].watchCount || 0) + 1;
     saveAnimeData();
-    renderAnimeList();
-  }
 
-  // Initial render
-  renderAnimeList();
+    btn.textContent = `${animeArray[index].watchCount}`;
+  });
 
-  // Enter key adds
-  animeTitleInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
+  // Enter adds
+  animeTitleInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
       addAnime();
     }
   });
@@ -156,25 +150,10 @@ function renderAnimeList() {
   // Search (debounced)
   animeSearchInput.addEventListener('input', () => {
     if (renderTimeout) clearTimeout(renderTimeout);
-    renderTimeout = setTimeout(renderAnimeList, 120);
+    renderTimeout = setTimeout(renderAnimeList, 80);
   });
 
-  // Scroll + resize rerender
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!isRendering) renderAnimeList();
-    },
-    { passive: true }
-  );
-
-  window.addEventListener(
-    'resize',
-    () => {
-      if (renderTimeout) clearTimeout(renderTimeout);
-      renderTimeout = setTimeout(renderAnimeList, 120);
-    },
-    { passive: true }
-  );
-
+  // Init
+  loadData();
+  renderAnimeList();
 });
