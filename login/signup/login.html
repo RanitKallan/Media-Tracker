@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | Modern Interface</title>
+    <link rel="stylesheet" href="login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <h2>Welcome Back</h2>
+            <form id="loginForm" action="/login" method="post">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <span class="password-toggle">👁️</span>
+                </div>
+                <button type="submit">Sign In</button>
+                <p>Don't have an account? <a href="signup.html">Sign up now</a></p>
+            </form>
+            <div id="login-error-message" class="error"></div>
+        </div>
+    </div>
+    <script src="login.js"></script>
+</body>
+</html>
