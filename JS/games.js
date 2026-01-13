@@ -133,15 +133,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Delegated button events (so it works after re-render)
   animeListEl.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
+  const btn = e.target.closest("button");
+  if (!btn) return;
 
-    const index = Number(btn.dataset.index);
-    if (Number.isNaN(index)) return;
+  const index = Number(btn.dataset.index);
+  if (Number.isNaN(index)) return;
 
-    if (btn.classList.contains("btn-up")) move(index, -1);
-    if (btn.classList.contains("btn-down")) move(index, +1);
-    if (btn.classList.contains("btn-del")) removeAnime(index);
+  if (btn.classList.contains("up")) move(index, -1);
+  if (btn.classList.contains("down")) move(index, +1);
+  if (btn.classList.contains("delete")) removeAnime(index);
   });
 
   // First paint
