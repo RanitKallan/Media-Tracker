@@ -90,13 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
       // ✅ SAFE: textContent prevents titles breaking your HTML
       titleSpan.textContent = `${i + 1}. ${anime.title}`;
 
-      const btn = document.createElement('button');
-      btn.className = 'watch-count-button';
-      btn.dataset.index = String(idx);
-      btn.textContent = `${anime.watchCount || 0}`;
+      // Right-side controls (watch + delete)
+      const controlsDiv = document.createElement('div');
+      controlsDiv.style.display = 'flex';
+      controlsDiv.style.gap = '10px';
+      controlsDiv.style.alignItems = 'center';
+
+      const watchBtn = document.createElement('button');
+      watchBtn.className = 'watch-count-button';
+      watchBtn.dataset.index = String(idx);
+      watchBtn.textContent = `${anime.watchCount || 0}`;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-button';
+      deleteBtn.dataset.index = String(idx);
+      deleteBtn.textContent = 'Delete';
+
+      controlsDiv.appendChild(watchBtn);
+      controlsDiv.appendChild(deleteBtn);
 
       li.appendChild(titleSpan);
-      li.appendChild(btn);
+      li.appendChild(controlsDiv);
       fragment.appendChild(li);
     });
 
@@ -123,18 +137,32 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAnimeList();
   }
 
-  // ✅ Click handler (watch count increment) — bound once
+  // ✅ Click handler — handles BOTH watch increment and delete
   animeList.addEventListener('click', (e) => {
-    const btn = e.target.closest('.watch-count-button');
-    if (!btn) return;
+    // WATCH COUNT
+    const watchBtn = e.target.closest('.watch-count-button');
+    if (watchBtn) {
+      const index = parseInt(watchBtn.dataset.index, 10);
+      if (Number.isNaN(index) || !animeArray[index]) return;
 
-    const index = parseInt(btn.dataset.index, 10);
-    if (Number.isNaN(index) || !animeArray[index]) return;
+      animeArray[index].watchCount = (animeArray[index].watchCount || 0) + 1;
+      saveAnimeData();
 
-    animeArray[index].watchCount = (animeArray[index].watchCount || 0) + 1;
-    saveAnimeData();
+      watchBtn.textContent = `${animeArray[index].watchCount}`;
+      return;
+    }
 
-    btn.textContent = `${animeArray[index].watchCount}`;
+    // DELETE
+    const deleteBtn = e.target.closest('.delete-button');
+    if (deleteBtn) {
+      const index = parseInt(deleteBtn.dataset.index, 10);
+      if (Number.isNaN(index) || !animeArray[index]) return;
+
+      animeArray.splice(index, 1);
+      rebuildTitleMap();
+      saveAnimeData();
+      renderAnimeList();
+    }
   });
 
   // Enter adds

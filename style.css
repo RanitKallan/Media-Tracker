@@ -1836,6 +1836,19 @@ table tr:last-child td:last-child {
     animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
 }
 
+.delete-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
+  background-color: #cc0000;
+}
+
 @keyframes typing {
     from { width: 0 }
     to { width: 100% }
