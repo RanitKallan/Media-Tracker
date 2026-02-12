@@ -153,17 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // DELETE
-    const deleteBtn = e.target.closest('.delete-button');
-    if (deleteBtn) {
-      const index = parseInt(deleteBtn.dataset.index, 10);
-      if (Number.isNaN(index) || !animeArray[index]) return;
+  //   const deleteBtn = e.target.closest('.delete-button');
+  //   if (deleteBtn) {
+  //     const index = parseInt(deleteBtn.dataset.index, 10);
+  //     if (Number.isNaN(index) || !animeArray[index]) return;
 
-      animeArray.splice(index, 1);
-      rebuildTitleMap();
-      saveAnimeData();
-      renderAnimeList();
-    }
-  });
+  //     animeArray.splice(index, 1);
+  //     rebuildTitleMap();
+  //     saveAnimeData();
+  //     renderAnimeList();
+  //   }
+  // });
 
   // Enter adds
   animeTitleInput.addEventListener('keydown', (e) => {
@@ -185,3 +185,4 @@ document.addEventListener('DOMContentLoaded', () => {
   loadData();
   renderAnimeList();
 });
+
